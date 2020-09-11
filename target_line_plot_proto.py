@@ -10,6 +10,7 @@ distance above/below line from input survey data.
 
 # *** IMPORT LIBRARIES ***
 import math
+import plotly.express as px
 
 # *** DEFINE VARIABLES ***
 
@@ -23,7 +24,7 @@ svy_tvd = 8760 # feet TVD
 svy_vs = 8150 # feet VS
 
 # Lateral Length
-lat_len = 10000 # feet VS
+lat_len = 12500 # feet VS
 
 # *** MAIN SCRIPT ***
 
@@ -37,7 +38,7 @@ elif dtvd < 0:
 else:
 	location = 'on the'
 
-print(f"Target line: {tvd_0vs}' KB TVD @ 0' VS")
+print(f"Target line: {tvd_0vs}' KB TVD @ 0' VS, {inc_degrees} INC")
 print(f"Survey: {svy_tvd}' TVD @ {svy_vs}' VS")
 print(f"Target line depth at {svy_vs}' VS is {tvd_target:.2f}' TVD.")
 print(f"Survey is {dtvd:.2f}' TVD {location} target line.")
@@ -54,3 +55,9 @@ while vs <= lat_len:
 print("Target Line\nVS   TVD")
 for i in range(0,len(tl_vs)):
 	print(tl_vs[i], round(tl_tvd[i]))
+
+# plot target line graph
+fig = px.line(x=tl_vs, y=tl_tvd, title="Target Line Plot")
+fig.update_xaxes(title_text='VS (feet)')
+fig.update_yaxes(title_text='TVD (feet)', autorange='reversed')
+fig.show()
