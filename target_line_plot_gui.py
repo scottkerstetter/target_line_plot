@@ -1,0 +1,85 @@
+"""
+TARGET LINE PLOT
+Version: 0
+Author: S Kerstetter
+Last Update: 09/09/2020
+
+Plot target line for directional drilling from input target line data and calculate
+distance above/below line from input survey data.
+"""
+
+# *** IMPORT LIBRARIES ***
+import math
+import plotly.express as px
+import PySimpleGUI as sg
+
+# *** DEFINE VARIABLES ***
+
+# Target Line Inputs
+tvd_0vs = 8811 # feet KB TVD
+inc_degrees = 90.3 # degrees
+inc_radians = math.radians(90.0 - inc_degrees)
+
+# Survey Inputs
+svy_tvd = 8760 # feet TVD
+svy_vs = 8150 # feet VS
+
+# Lateral Length
+lat_len = 12500 # feet VS
+
+# *** GUI ***
+
+sg.theme('DarkBlack')
+layout = [   [sg.Text("TARGET LINE:")],
+			 [sg.Text(f"Enter TVD @ 0' VS"), sg.InputText()],
+			 [sg.Text("Enter Inclination"), sg.InputText()],
+			 [sg.Text("SURVEY:")],
+			 [sg.Text("Enter Survey TVD"), sg.InputText()],
+			 [sg.Text("Enter Survey VS"), sg.InputText()],
+			 [sg.Button('Ok'), sg.Button('Cancel')] ]
+			 
+window = sg.Window('Target Line Plot', layout)
+
+while True:
+	event, values = window.read()
+	if event == sg.WIN_CLOSED or event == 'Cancel':
+		break
+	print('You entered ', values[0])
+	
+window.close()
+
+# *** MAIN SCRIPT ***
+
+tvd_target = math.tan(inc_radians) * svy_vs + tvd_0vs
+dtvd = tvd_target - svy_tvd
+
+if dtvd > 0:
+	location = 'above'
+elif dtvd < 0:
+	location = 'below'
+else:
+	location = 'on the'
+
+print(f"Target line: {tvd_0vs}' KB TVD @ 0' VS, {inc_degrees} INC")
+print(f"Survey: {svy_tvd}' TVD @ {svy_vs}' VS")
+print(f"Target line depth at {svy_vs}' VS is {tvd_target:.2f}' TVD.")
+print(f"Survey is {dtvd:.2f}' TVD {location} target line.")
+
+# calculate target line TVD every 100' VS
+tl_vs = []
+tl_tvd = []
+vs = 0
+while vs <= lat_len:
+	tl_vs.append(vs)
+	tl_tvd.append(math.tan(inc_radians) * vs + tvd_0vs)
+	vs += 100
+
+print("Target Line\nVS   TVD")
+for i in range(0,len(tl_vs)):
+	print(tl_vs[i], round(tl_tvd[i]))
+
+# plot target line graph
+fig = px.line(x=tl_vs, y=tl_tvd, title="Target Line Plot")
+fig.update_xaxes(title_text='VS (feet)')
+fig.update_yaxes(title_text='TVD (feet)', autorange='reversed')
+fig.show()
